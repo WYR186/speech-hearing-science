@@ -4,6 +4,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   pages: write
   id-token: write
@@ -27,6 +28,18 @@ jobs:
         uses: actions/upload-pages-artifact@v4
         with:
           path: site
+      - name: Wait for the deployment package
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in {1..20}; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages" --jq '.total_count' | grep -qx '[1-9][0-9]*'; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo 'GitHub did not index the Pages package in time.' >&2
+          exit 1
       - name: Deploy the site
         id: deployment
         uses: actions/deploy-pages@v4
