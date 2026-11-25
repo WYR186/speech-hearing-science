@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Journey Through the Ear (一声入耳): an interactive 3D walk from the pinna to the auditory nerve for Speech &amp; Hearing Science.">
+  <meta name="theme-color" content="#0f2420">
+  <title>Journey Through the Ear | Speech &amp; Hearing Science</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/ear-3d.css?v=2">
+  <script defer src="assets/ear-3d.js?v=2"></script>
+</head>
+<body class="ear3d-page">
+  <a class="skip-link" href="#panel"><span class="en-only">Skip to the lesson panel</span><span class="cn-only">跳到学习面板</span></a>
+  <header class="e3-top">
+    <a class="e3-brand" href="index.html" data-route="index.html"><span class="wordmark-icon" aria-hidden="true">∿</span><span>Speech &amp; Hearing Science</span></a>
+    <p class="e3-title"><span class="en-only">Journey Through the Ear</span><span class="cn-only" lang="zh-Hans">一声入耳</span><span class="e3-tag">3D</span></p>
+    <div class="e3-tools">
+      <button type="button" class="tool" id="sound-btn" aria-pressed="false" title="Sound">
+        <svg class="i-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="w" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        <svg class="i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="w" d="M17 9l5 6M22 9l-5 6"/></svg>
+        <span class="tool-t"><span class="en-only">Sound</span><span class="cn-only">声音</span></span>
+      </button>
+      <input type="range" id="volume" min="0" max="0.6" step="0.01" value="0.25" aria-label="Volume" hidden>
+      <button type="button" class="tool" id="motion-btn" aria-pressed="false" title="Reduce motion">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="w" d="M3 12h4M17 12h4M12 3v4M12 17v4"/><circle cx="12" cy="12" r="3"/></svg>
+        <span class="tool-t"><span class="en-only">Reduce motion</span><span class="cn-only">减少动态</span></span>
+      </button>
+      <button type="button" class="tool" id="view-btn" aria-pressed="false" title="2D step view">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect class="w" x="4" y="5" width="16" height="14" rx="2"/><path class="w" d="M8 14l3-3 3 2 3-4"/></svg>
+        <span class="tool-t"><span class="en-only">2D view</span><span class="cn-only">2D 图</span></span>
+      </button>
+      <div class="lang-switch" data-active="en" role="group" aria-label="Language">
+        <span class="lang-thumb" aria-hidden="true"></span>
+        <button type="button" data-lang="en" aria-pressed="true">EN</button>
+        <button type="button" data-lang="mixed" aria-label="English and Chinese" aria-pressed="false">EN+<span class="cn-only">中</span><span class="en-only lang-zh">ZH</span></button>
+        <button type="button" data-lang="cn" aria-label="Chinese" aria-pressed="false"><span class="cn-only">中</span><span class="en-only lang-zh">ZH</span></button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="e3-rail" id="rail" aria-label="Stations"></nav>
+
+  <main class="e3-main">
+    <section class="e3-stage" aria-label="Model">
+      <div class="e3-viewport" id="viewport">
+        <canvas id="gl" aria-label="3D ear model. Drag to rotate, scroll to zoom, click a structure. With the model focused, arrow keys rotate and plus/minus zoom."></canvas>
+        <div id="view2d" class="e3-2d" hidden></div>
+        <div id="labels" class="e3-labels"></div>
+        <div class="e3-signal" id="signal" role="note"></div>
+        <div class="e3-vtools" role="toolbar" aria-label="Model controls">
+          <button type="button" class="vt" id="pause-btn" aria-pressed="false" title="Pause (P)"></button>
+          <button type="button" class="vt" id="step-btn" title="Step (.)"><span aria-hidden="true">⏭</span><span class="step-n"></span><span class="sr-only">Step</span></button>
+          <button type="button" class="vt" id="replay-btn" title="Replay arrival"><span aria-hidden="true">↻</span><span class="sr-only">Replay</span></button>
+          <span class="vt-sep" aria-hidden="true"></span>
+          <button type="button" class="vt" id="zin-btn" title="Zoom in (+)"><span aria-hidden="true">＋</span><span class="sr-only">Zoom in</span></button>
+          <button type="button" class="vt" id="zout-btn" title="Zoom out (−)"><span aria-hidden="true">－</span><span class="sr-only">Zoom out</span></button>
+          <button type="button" class="vt" id="reset-btn" title="Reset view (R)"><span aria-hidden="true">⌖</span><span class="sr-only">Reset view</span></button>
+          <button type="button" class="vt" id="labels-btn" aria-pressed="true" title="Labels (L)"><span aria-hidden="true">Aa</span><span class="sr-only">Labels</span></button>
+        </div>
+        <div class="e3-float-info" id="float-info" role="dialog" aria-label="Structure" hidden></div>
+        <div class="e3-minimap" id="minimap" aria-hidden="true"><span class="mm-t"><span class="en-only">You are here</span><span class="cn-only">当前位置</span></span></div>
+        <p class="e3-orient" id="orient"></p>
+        <div class="e3-toast" id="toast" role="status" aria-live="polite" hidden></div>
+        <div class="e3-tooltip" id="tooltip" hidden></div>
+        <div class="e3-fade" id="fade" aria-hidden="true"></div>
+        <div class="e3-intro" id="intro">
+          <div class="intro-card">
+            <p class="eyebrow"><span class="en-only">Speech &amp; Hearing Science · interactive 3D</span><span class="cn-only">Speech &amp; Hearing Science · 交互式 3D</span></p>
+            <h2><span class="en-only">Journey Through the Ear</span><span class="cn-only">一声入耳</span></h2>
+            <p class="intro-lede"><span class="en-only">Make a sound and ride with it: pinna → eardrum → ossicles → cochlea → hair cells → auditory nerve. At every stop, predict, act on the model, then explain.</span><span class="cn-only">发出一个声音，跟着它走：耳廓 → 鼓膜 → 听小骨 → 耳蜗 → 毛细胞 → 听神经。每一站先预测、在模型上动手，再解释。</span></p>
+            <div class="intro-actions">
+              <button type="button" class="btn-hero" id="start-btn"><span class="pulse-dot" aria-hidden="true"></span><span class="en-only">Make a sound</span><span class="cn-only">发出声音</span></button>
+              <button type="button" class="btn-ghost-light" id="explore-btn"><span class="en-only">Explore freely</span><span class="cn-only">自由探索</span></button>
+            </div>
+            <p class="intro-fine"><span class="en-only">Sound is off by default. Turn it on with the speaker in the top bar.</span><span class="cn-only">声音默认关闭，可用顶部扬声器按钮开启。</span></p>
+          </div>
+        </div>
+      </div>
+      <div class="e3-readout" id="readout" aria-label="Model controls and readouts"></div>
+    </section>
+
+    <aside class="e3-panel" id="panel" tabindex="-1" aria-label="Lesson panel">
+      <div class="e3-tabs" id="tabs" role="tablist" aria-label="Panel">
+        <button type="button" role="tab" data-tab="learn" aria-selected="true" aria-controls="tab-learn"><span class="en-only">Learn</span><span class="cn-only">学习</span></button>
+        <button type="button" role="tab" data-tab="explore" aria-selected="false" aria-controls="tab-explore" tabindex="-1"><span class="en-only">Explore</span><span class="cn-only">探索</span></button>
+        <button type="button" role="tab" data-tab="figures" aria-selected="false" aria-controls="tab-figures" tabindex="-1"><span class="en-only">Further reading</span><span class="cn-only">延伸阅读</span></button>
+      </div>
+      <div class="e3-panel-body">
+        <div id="tab-learn" role="tabpanel"></div>
+        <div id="tab-explore" role="tabpanel" hidden></div>
+        <div id="tab-figures" role="tabpanel" hidden></div>
+      </div>
+      <nav class="e3-stepnav" aria-label="Station navigation">
+        <button type="button" id="prev-st"><span aria-hidden="true">‹</span> <span class="en-only">Previous</span><span class="cn-only">上一站</span></button>
+        <button type="button" id="skip-task"><span class="en-only">Skip task</span><span class="cn-only">跳过此题</span></button>
+        <button type="button" id="next-st" class="is-primary"><span class="en-only">Next station</span><span class="cn-only">下一站</span> <span aria-hidden="true">›</span></button>
+      </nav>
+    </aside>
+  </main>
+  <noscript><p class="e3-noscript">This page needs JavaScript.</p></noscript>
+</body>
+</html>

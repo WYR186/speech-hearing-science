@@ -1,5 +1,5 @@
 # Speech & Hearing Science
 
-A bilingual study website project. This repository contains the manual GitHub Pages workflow. The website files are kept locally for personal use.
+Journey Through the Ear is a bilingual, interactive 3D introduction to hearing, with schematic models and self-checks.
 
-The workflow expects a static website in `site/`.
+Open `site/index.html` in a browser. The GitHub Pages workflow can deploy the static site through a manual run.
